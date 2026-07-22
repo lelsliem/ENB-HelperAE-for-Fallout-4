@@ -1,0 +1,12 @@
+EXPORTS
+    GetTime
+    GetWeatherTransition
+    GetCurrentWeather
+    GetOutgoingWeather
+    GetCurrentWeatherClassification
+    GetOutgoingWeatherClassification
+    GetCurrentLocationID
+    GetWorldSpaceID
+    GetSkyMode
+    GetPlayerCameraTransformMatrices
+    IsLoaded
