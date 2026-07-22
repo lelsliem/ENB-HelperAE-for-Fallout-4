@@ -1,55 +1,31 @@
-# CommonLibF4 Plugin Template
+# ENBHelperF4 - Next-Gen Asynchronous Performance Edition
 
-This is a basic plugin template using CommonLibF4.
+A native F4SE script extender plugin built from scratch using the modern **CommonLibF4 Next-Gen Template** to provide an optimized data bridge between the Fallout 4 game engine and ENB graphics pipelines.
 
-### Requirements
-* [XMake](https://xmake.io) [3.0.0+]
-* C++23 Compiler (MSVC or Clang-CL)
+## 🚀 Key Modernizations & Optimizations
+* **Asynchronous Thread Execution**: Completely decouples cell tracking and matrix math from the game's primary rendering loop. Calculations execute on a dedicated 60Hz background worker thread to completely eliminate micro-stutters and frame-time spikes in dense urban environments.
+* **Un-Mangled Symbol Exports**: Explicitly links all core graphical hook functions via a module definition map file, preventing string-stripping during release configurations so the ENB binaries hook data instantly.
+* **Natively Multi-Version Aware**: Fully compliant with the official script extender structure offsets for Fallout 4 Next-Gen Update builds (**v1.11.220, v1.11.221, and newer**).
+* **ReShade Memory Bridge**: Includes a custom exported pointer entry (`GetReShadeBridgePointer`) allowing post-processing shaders to synchronize variables in real-time alongside ENB.
 
-## Getting Started
-```bat
-git clone --recurse-submodules https://github.com/libxse/commonlibf4-template
-cd commonlibf4-template
-```
+## 🛠️ Supported Graphics Pipeline Exports
+* `GetTime` (In-Game Hour Tracking)
+* `GetWeatherTransition` (Climate Transition Percentages)
+* `GetCurrentWeather` / `GetOutgoingWeather` (Form ID Climate Tracking)
+* Weather Classifications (Sunny, Cloudy, Rainy, Snowy Bitmasks)
+* Location & Worldspace ID tracking (Supports DLC worldspaces natively)
+* `GetPlayerCameraTransformMatrices` (3D coordinate extraction matrices)
 
-### Build
-To build the project, run the following command:
-```bat
-xmake build
-```
+## 🏗️ Compiling the Project
+This project uses **xmake** for modern, standalone compilation management with zero manual dependency hunting.
 
-> ***Note:*** *This will generate a `build/windows/` directory in the **project's root directory** with the build output.*
-
-### Build Output (Optional)
-If you want to redirect the build output, set one of the following environment variables:
-
-- Path to a Mod Manager mods folder: `XSE_FO4_MODS_PATH`
-
-  or
-
-- Path to a Fallout 4 install folder: `XSE_FO4_GAME_PATH`
-
-### Project Generation (Optional)
-If you use Visual Studio, run the following command:
-```bat
-xmake project -k vsxmake
-```
-
-> ***Note:*** *This will generate a `vsxmakeXXXX/` directory in the **project's root directory** using the latest version of Visual Studio installed on the system.*
-
-**Alternatively**, if you do not use Visual Studio, you can generate a `compile_commands.json` file for use with a laguage server like clangd in any code editor that supports it, like vscode:
-```bat
-xmake project -k compile_commands
-```
-
-> ***Note:*** *You must have a language server extension installed to make use of this file. I recommend `clangd`. Do not have more than one installed at a time as they will conflict with each other. I also recommend installing the `xmake` extension if available to make building the project easier.*
-
-### Upgrading Packages (Optional)
-If you want to upgrade the project's dependencies, run the following commands:
-```bat
-xmake repo --update
-xmake require --upgrade
-```
-
-## Documentation
-Please refer to the [Wiki](../../wiki/Home) for more advanced topics.
+1. Ensure **XMake (v3.0.9+)** and Visual Studio 2022 Build Tools are installed.
+2. Clone the repository with its accompanying submodules:
+   ```bash
+   git clone --recursive https://github.com/lelsliem/ENB-HelperAE-for-Fallout-4
+   ```
+3. Initialize configurations and compile the release binary module:
+   ```bash
+   xmake config -p windows -a x64 -m release
+   xmake
+   ```
