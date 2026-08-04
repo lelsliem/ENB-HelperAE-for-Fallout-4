@@ -9,4 +9,10 @@ EXPORTS
     GetWorldSpaceID
     GetSkyMode
     GetPlayerCameraTransformMatrices
+    GetIsInterior
+    GetReShadeBridgePointer
+    GetHealthStatus
+    GetPluginVersion
+    F4SEPlugin_Query
+    F4SEPlugin_Load
     IsLoaded
