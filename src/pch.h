@@ -7,9 +7,9 @@
 #include "RE/Fallout.h"
 #include "F4SE/F4SE.h"
 
-// Explicitly imports the unified extra data lists and camera engine layout files
-#include "RE/E/ExtraDataList.h"
-#include "RE/B/BGSLocation.h"
-#include "RE/P/PlayerCamera.h"
+// Optional extra includes used across the project
+#include <shared_mutex>
+#include <atomic>
+#include <thread>
 
 #define DLLEXPORT __declspec(dllexport)
