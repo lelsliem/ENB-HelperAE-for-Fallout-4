@@ -1,5 +1,13 @@
 # ENBHelperF4 - Next-Gen Asynchronous Performance Edition
 
+Changelog for v1.5
+v1.5.0 — ReShade bridge and stability fixes
+- Added GetReShadeBridgePointer() for compact ReShade/ENB integration.
+- Added GetHealthStatus() single-call snapshot export.
+- Added GetPluginVersion() and IsLoaded() exports.
+- Hardened logging and thread safety; worker thread joined on unload.
+- Synchronized .def exports to ensure unmangled names for Reactor/ENB.
+
 A native F4SE script extender plugin built from scratch using the modern **CommonLibF4 Next-Gen Template** to provide an optimized data bridge between the Fallout 4 game engine and ENB graphics pipelines.
 
 ## 🚀 Key Modernizations & Optimizations
