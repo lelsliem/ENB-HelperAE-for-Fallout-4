@@ -9,19 +9,52 @@
 #include "enbhelper.h"
 
 #include <shared_mutex>
+#include <utility>
 
 bool bLoaded = false;              // single definition for linker
 std::shared_mutex stateMutex;      // guards cachedData between concurrent getters
 ThreadCachedData cachedData{};
 
-static bool validInterior(const RE::PlayerCharacter* a_player) noexcept
+// Indoors there is no sky weather, so ENB needs stable stand-ins: the cell's
+// lighting template stands in for "current weather", and the interior lighting
+// transition stands in for the weather transition. These are design choices
+// for the plugin — ENB just requires a value indoors — kept here as named
+// helpers so the intent survives.
+
+// The cell the player is in, when it is an interior cell.
+static const RE::TESObjectCELL* InteriorCell(const RE::PlayerCharacter* a_player) noexcept
 {
-    return a_player && a_player->parentCell && a_player->parentCell->IsInterior();
+    const auto* cell = a_player ? a_player->parentCell : nullptr;
+    return cell && cell->IsInterior() ? cell : nullptr;
 }
 
-// The classification bitmask lives at TESWeather::weatherData[kFlags] — one byte,
-// one bit per WeatherDataFlags value. The original code read the whole 20-byte
-// array as a single int, which grabbed the wind-speed byte instead.
+// The interior cell's lighting template, used as the indoor "weather" FormID.
+static const RE::BGSLightingTemplate* InteriorLighting(const RE::PlayerCharacter* a_player) noexcept
+{
+    const auto* cell = InteriorCell(a_player);
+    return cell ? cell->lightingTemplate : nullptr;
+}
+
+// Weather transition while indoors: the game animates interior lighting via
+// Sky::lightingTransition (0-1). Mid-change we report it; idle (0) reports 1.0,
+// which ENB reads as "no transition in progress".
+static float InteriorWeatherTransition(const RE::Sky* a_sky) noexcept
+{
+    const auto t = a_sky->lightingTransition;
+    return t > 0.0f ? t : 1.0f;
+}
+
+// Weather classification is part of the ENB Helper API contract: 0=sunny,
+// 1=cloudy, 2=rainy, 3=snow, -1=unknown. TESWeather stores one flags byte
+// (WeatherData::kFlags) whose bits are WeatherDataFlags; the table keeps the
+// mapping explicit and adding a flag is a one-line change.
+static constexpr std::pair<std::uint8_t, std::int32_t> kWeatherFlagToClass[] = {
+    { static_cast<std::uint8_t>(RE::TESWeather::WeatherDataFlags::kPleasant), 0 },
+    { static_cast<std::uint8_t>(RE::TESWeather::WeatherDataFlags::kCloudy),   1 },
+    { static_cast<std::uint8_t>(RE::TESWeather::WeatherDataFlags::kRainy),    2 },
+    { static_cast<std::uint8_t>(RE::TESWeather::WeatherDataFlags::kSnow),     3 },
+};
+
 static std::int32_t CalculateClassification(const RE::TESWeather* a_weather) noexcept
 {
     if (!a_weather) {
@@ -29,17 +62,10 @@ static std::int32_t CalculateClassification(const RE::TESWeather* a_weather) noe
     }
 
     const auto flags = a_weather->weatherData[static_cast<std::size_t>(RE::TESWeather::WeatherData::kFlags)];
-    if (flags & static_cast<std::uint8_t>(RE::TESWeather::WeatherDataFlags::kPleasant)) {
-        return 0;
-    }
-    if (flags & static_cast<std::uint8_t>(RE::TESWeather::WeatherDataFlags::kCloudy)) {
-        return 1;
-    }
-    if (flags & static_cast<std::uint8_t>(RE::TESWeather::WeatherDataFlags::kRainy)) {
-        return 2;
-    }
-    if (flags & static_cast<std::uint8_t>(RE::TESWeather::WeatherDataFlags::kSnow)) {
-        return 3;
+    for (const auto& [flag, classification] : kWeatherFlagToClass) {
+        if ((flags & flag) != 0) {
+            return classification;
+        }
     }
     return -1;
 }
@@ -60,14 +86,15 @@ void RefreshCachedState() noexcept
     }
 
     fresh.time = sky->currentGameHour;
-    fresh.isInterior = validInterior(player);
 
-    if (fresh.isInterior) {
-        fresh.weatherTransition = sky->lightingTransition == 0.0f ? 1.0f : sky->lightingTransition;
-        if (player->parentCell && player->parentCell->lightingTemplate) {
-            fresh.currentWeatherID = player->parentCell->lightingTemplate->formID;
-        }
+    // Indoors: report the lighting template as the weather and the interior
+    // lighting transition as the transition value. Outdoors: sky weather.
+    if (const auto* light = InteriorLighting(player)) {
+        fresh.isInterior = true;
+        fresh.currentWeatherID = light->formID;
+        fresh.weatherTransition = InteriorWeatherTransition(sky);
     } else {
+        fresh.isInterior = false;
         fresh.weatherTransition = sky->currentWeatherPct;
         if (sky->currentWeather) {
             fresh.currentWeatherID = sky->currentWeather->formID;
