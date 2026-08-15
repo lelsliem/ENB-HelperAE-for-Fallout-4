@@ -8,6 +8,16 @@
 set_xmakever("3.0.0")
 
 set_project("ENBHelperF4")
+
+-- Platform pin: when xmake runs from Git Bash / MSYS2 (MSYSTEM=MINGW64 is set),
+-- it can misdetect the platform as "mingw" and try to build the spdlog package
+-- with a nonexistent gcc, failing with "cannot get program for cc". Force the
+-- platform to windows on a Windows host so the project configures identically
+-- from any shell. A command-line `xmake f -p <plat>` still overrides this.
+if os.host() == "windows" then
+    set_config("plat", "windows")
+end
+
 set_version("1.5.0")
 set_license("GPL-3.0")
 set_languages("c++23")
