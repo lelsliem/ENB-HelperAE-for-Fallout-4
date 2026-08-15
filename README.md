@@ -57,7 +57,7 @@ code. AI still helps out — it just doesn't write the parts that have to be rig
 | `GetIsInterior(bool&)` | 1 if the player is inside an interior cell |
 | `GetReShadeBridgePointer()` | Stable pointer to a small shared struct (time, interior flag, weather FormID) for ReShade shaders |
 | `GetHealthStatus(ENBHelperHealth*)` | All of the above in one struct, one call |
-| `GetPluginVersion()` | `1.5` |
+| `GetPluginVersion()` | `1.51` (1.5.1 as a float) |
 | `IsLoaded()` | True once the plugin has loaded successfully |
 
 The exports keep their C names via `src/ENBHelperF4.def` so ENB/ReShade can find them by
@@ -87,7 +87,7 @@ no hand-rolled `DllMain`.
 - It only reads. There's no API for shaders to push values back into the game.
 - The getters must be called from the game/render thread. That's where ENB and ReShade call
   them from; if something else calls them from a worker thread, you're on your own.
-- `GetPluginVersion()` returns a float (1.5). Floats are a silly way to version things, but
+- `GetPluginVersion()` returns a float (1.51). Floats are a silly way to version things, but
   it's the ABI that's already out there.
 
 ## Building
@@ -117,7 +117,9 @@ Copy `ENBHelperF4.dll` to your `Data/F4SE/Plugins/` folder. On load it writes a 
 
 ## Changelog
 
-### v1.5.0 — the one where I fixed the AI's bugs
+### v1.5.1 — the one where I fixed the AI's bugs
+
+The AI-written 1.5.0 release was pulled from Nexus; this is the corrected rebuild.
 
 - Removed the 60 Hz worker thread. The original ran a detached thread that poked `RE::Sky`,
   `PlayerCharacter`, and `PlayerCamera` from outside the game thread. The game owns those

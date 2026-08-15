@@ -138,8 +138,8 @@ extern "C" DLLEXPORT bool GetHealthStatus(ENBHelperHealth* out)
 
 extern "C" DLLEXPORT float GetPluginVersion()
 {
-    // Version 1.5
-    return 1.5f;
+    // Version 1.5.1 — encoded as a float because that's the ABI that's out there
+    return 1.51f;
 }
 
 extern "C" DLLEXPORT bool IsLoaded()

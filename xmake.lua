@@ -18,7 +18,7 @@ if os.host() == "windows" then
     set_config("plat", "windows")
 end
 
-set_version("1.5.0")
+set_version("1.5.1")
 set_license("GPL-3.0")
 set_languages("c++23")
 set_encodings("utf-8")
@@ -44,7 +44,7 @@ target("ENBHelperF4", function()
         name        = "ENBHelperF4",
         author      = "lelsliem",
         description = "ENBHelperF4 - ReShade/ENB bridge for Fallout 4 AE",
-        version     = "1.5.0",
+        version     = "1.5.1",
     })
 
     add_files("src/**.cpp")
