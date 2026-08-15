@@ -35,10 +35,22 @@ plain `IsInterior()`, an idiomatic `F4SE_PLUGIN_LOAD` entry point, and dependenc
 vendored so the repo builds out of the box. Then it was tested in-game, and this README was
 rewritten to say only what the code does.
 
+**Aug 2026 — the crash nobody saw coming.** The rewrite loaded clean, but ENB itself
+crashed it: ENB's d3d11 proxy calls `GetPlayerCameraTransformMatrices` with a
+mismatched prototype and passes a `-1` output pointer, and the unguarded copy-out
+killed the game at startup. Disassembling the faulting instruction showed the truth
+(a write through a poisoned pointer passed in by the caller, not a bad read on our
+side), and every output getter now writes through an SEH guard that skips the write
+instead of dying. ENB's calls are still wrong-shaped, but they can no longer crash the
+game.
+
 **Now.** The plugin is in the state this README describes: honest, tested, with its
-limitations written down. The export ABI is the standard ENB Helper one (see
-[Credits and lineage](#credits-and-lineage)); everything behind it is this project's own
-code. AI still helps out — it just doesn't write the parts that have to be right.
+limitations written down. A heartbeat line in the log proves data actually flows
+(ENB polls the getters every frame — tens of thousands of calls per session, live
+weather/location values) and crashes are provably gone. The export ABI is the
+standard ENB Helper one (see [Credits and lineage](#credits-and-lineage));
+everything behind it is this project's own code. AI still helps out — it just
+doesn't write the parts that have to be right.
 
 ## What it exports
 
@@ -139,6 +151,10 @@ The AI-written 1.5.0 release was pulled from Nexus; this is the corrected rebuil
   d3d11 proxy calls the camera getter with a `-1` output pointer (mismatched
   prototype) and that crashed the game at startup; all output writes now run
   under SEH and skip the write instead of dying.
+- Added a heartbeat log line so working is provable, not assumed: while a
+  consumer calls the exports, the log shows live call counts and game state
+  (time, weather, location) once per second. This is the verification build —
+  the heartbeat can be stripped for a final release if desired.
 
 ## Credits and lineage
 
