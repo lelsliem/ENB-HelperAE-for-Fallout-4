@@ -6,8 +6,9 @@ extern std::shared_mutex stateMutex;
 extern ThreadCachedData cachedData;
 extern bool bLoaded;
 
-// Re-samples the game state on the calling (render) thread, then reads the cached copy.
-// ENB/ReShade call these from the render thread, so this is race-free.
+// Every getter refreshes the state on the calling thread first, then reads its
+// field. ENB/ReShade call these from the render thread, so nothing is shared
+// across threads.
 
 extern "C" DLLEXPORT bool GetTime(float& time)
 {

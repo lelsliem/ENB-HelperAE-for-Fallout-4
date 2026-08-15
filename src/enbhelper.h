@@ -9,10 +9,10 @@
 #define DLLEXPORT
 #endif
 
-// Plugin global flags
+// True once F4SE_PLUGIN_LOAD has run
 extern bool bLoaded;
 
-// Shared state mutex and cached data struct
+// Cached game state, guarded so concurrent getters don't tear reads
 extern std::shared_mutex stateMutex;
 
 struct ThreadCachedData {
@@ -33,7 +33,7 @@ struct ThreadCachedData {
 
 extern ThreadCachedData cachedData;
 
-// Re-samples game state on the calling (render) thread. Defined in main.cpp.
+// Re-samples game state on the calling thread. Implemented in main.cpp.
 void RefreshCachedState() noexcept;
 
 // Compact health struct returned by GetHealthStatus

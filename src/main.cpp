@@ -1,14 +1,10 @@
-// src/main.cpp
+// ENBHelperF4 — the F4SE side: samples game state on demand and feeds the
+// exported getters in enbhelper.cpp.
 //
-// ENBHelperF4 — F4SE entry point and game-state sampler.
-//
-// The original AI-generated version ran a detached 60 Hz worker thread that read
-// RE::Sky / PlayerCharacter / PlayerCamera directly off the game thread. Those
-// objects are owned and mutated by the game thread, so reading them from another
-// thread is a use-after-free / data race. ENB and ReShade already call the exported
-// getters from the render (game) thread, so the right design is to sample on demand
-// inside the getters — no worker thread, no race.
-//
+// The AI-generated first draft ran a detached 60 Hz thread that read
+// RE::Sky / PlayerCharacter / PlayerCamera off the game thread. The game owns
+// those objects; that was a data race. Everything here runs on the calling
+// (render) thread now, which is where ENB and ReShade call from anyway.
 #include "PCH.h"
 #include "enbhelper.h"
 
@@ -23,9 +19,9 @@ static bool validInterior(const RE::PlayerCharacter* a_player) noexcept
     return a_player && a_player->parentCell && a_player->parentCell->IsInterior();
 }
 
-// Weather classification bitmask lives at TESWeather::weatherData[kFlags]; each bit is a
-// WeatherDataFlags value (Pleasant/Cloudy/Rainy/Snow). The original code dereferenced the
-// whole 20-byte array as one int, so it read the wind-speed byte as a "flag" — wrong.
+// The classification bitmask lives at TESWeather::weatherData[kFlags] — one byte,
+// one bit per WeatherDataFlags value. The original code read the whole 20-byte
+// array as a single int, which grabbed the wind-speed byte instead.
 static std::int32_t CalculateClassification(const RE::TESWeather* a_weather) noexcept
 {
     if (!a_weather) {
@@ -48,9 +44,9 @@ static std::int32_t CalculateClassification(const RE::TESWeather* a_weather) noe
     return -1;
 }
 
-// Reads the current game state into `cachedData`. Must be called on the game/render
-// thread — the exported getters all call this before returning, and ENB/ReShade invoke
-// them from the render thread, so this is safe.
+// Pulls the current game state into `cachedData`. Only ever called from the
+// exported getters, and only from the game/render thread — which is where
+// ENB/ReShade call from.
 void RefreshCachedState() noexcept
 {
     const auto* sky = RE::Sky::GetSingleton();
