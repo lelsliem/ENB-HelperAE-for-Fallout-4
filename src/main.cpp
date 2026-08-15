@@ -70,6 +70,29 @@ static std::int32_t CalculateClassification(const RE::TESWeather* a_weather) noe
     return -1;
 }
 
+// The camera node is owned by the game and can go stale — right after load,
+// or whenever the camera is rebuilt. Dereferencing a stale node faults, which
+// is exactly what the first in-game run did. The snapshot runs under SEH, so a
+// fault leaves the transforms at their defaults instead of crashing the game
+// (same pattern the SUP plugin uses for game-owned pointers).
+static void SnapshotCamera(const RE::PlayerCamera* a_camera, ThreadCachedData& a_out)
+{
+    if (!a_camera || !a_camera->cameraRoot) {
+        return;
+    }
+
+    __try {
+        const auto cameraNode = a_camera->cameraRoot.get();
+        if (cameraNode) {
+            a_out.cameraLocal = cameraNode->local;
+            a_out.cameraWorld = cameraNode->world;
+            a_out.cameraOldWorld = cameraNode->previousWorld;
+        }
+    } __except (1) {  // == EXCEPTION_EXECUTE_HANDLER; the macro doesn't resolve in this TU
+        // Camera pointer went stale mid-read; keep the defaults.
+    }
+}
+
 // Pulls the current game state into `cachedData`. Only ever called from the
 // exported getters, and only from the game/render thread — which is where
 // ENB/ReShade call from.
@@ -116,13 +139,7 @@ void RefreshCachedState() noexcept
 
     fresh.skyMode = sky->mode.underlying();
 
-    if (playerCamera && playerCamera->cameraRoot) {
-        if (const auto cameraNode = playerCamera->cameraRoot.get()) {
-            fresh.cameraLocal = cameraNode->local;
-            fresh.cameraWorld = cameraNode->world;
-            fresh.cameraOldWorld = cameraNode->previousWorld;
-        }
-    }
+    SnapshotCamera(playerCamera, fresh);
 
     std::unique_lock lock(stateMutex);
     cachedData = fresh;
