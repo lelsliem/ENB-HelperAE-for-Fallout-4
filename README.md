@@ -135,6 +135,10 @@ The AI-written 1.5.0 release was pulled from Nexus; this is the corrected rebuil
 - Vendored CommonLibF4 flat. The nested submodule was empty and the include path was wrong,
   so the repo didn't build out of the box. It does now.
 - Kept the `.def`-based unmangled exports; that part was fine.
+- Hardened every export against callers passing bad output pointers. ENB's
+  d3d11 proxy calls the camera getter with a `-1` output pointer (mismatched
+  prototype) and that crashed the game at startup; all output writes now run
+  under SEH and skip the write instead of dying.
 
 ## Credits and lineage
 
