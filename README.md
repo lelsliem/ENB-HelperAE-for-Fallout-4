@@ -151,10 +151,11 @@ The AI-written 1.5.0 release was pulled from Nexus; this is the corrected rebuil
   d3d11 proxy calls the camera getter with a `-1` output pointer (mismatched
   prototype) and that crashed the game at startup; all output writes now run
   under SEH and skip the write instead of dying.
-- Added a heartbeat log line so working is provable, not assumed: while a
-  consumer calls the exports, the log shows live call counts and game state
-  (time, weather, location) once per second. This is the verification build —
-  the heartbeat can be stripped for a final release if desired.
+- Added (then removed) a heartbeat log line used during verification: while a
+  consumer called the exports it logged live call counts and game state once
+  per second, proving data actually flows. That logging proved working during
+  in-game testing and was stripped for the release build — the exports are
+  unchanged, only the diagnostic log line is gone.
 
 ## Credits and lineage
 
