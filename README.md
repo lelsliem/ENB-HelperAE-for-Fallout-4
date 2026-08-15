@@ -6,6 +6,9 @@ what the weather's up to, whether you're inside, and where the camera is pointin
 No config files, no INI, no hotkeys. Load the DLL, and shaders call a handful of plain C
 functions to read current game state.
 
+Maintained by **lelsliem**. See [History](#history) for how it got here and
+[Credits and lineage](#credits-and-lineage) for where the API comes from.
+
 ## Why this exists
 
 ENB and ReShade shaders keep wanting to react to the game — darken things at night, change
@@ -13,17 +16,28 @@ the look when it rains, behave differently indoors. The game doesn't expose that
 way shaders can read, so this plugin sits in between. It reads the game on their behalf and
 hands the values over through `GetProcAddress`-able functions.
 
-## The short, honest history
+## History
 
-The first version of this plugin was written by an AI. It loaded, it "worked", and it was
-wrong in a few important ways: it ran a background thread that read game objects off the
-game thread (a data race waiting to happen), and its weather classification read the wrong
-byte of the weather data. The README at the time made bold claims about "asynchronous thread
-execution" eliminating stutters — none of which were true.
+This plugin's story is worth telling, because it explains why the code looks the way it
+does.
 
-This version is the rewrite: same idea, but checked and corrected against how the game
-actually works, then tested in-game. AI still helps out with this project — it just doesn't
-write the parts that have to be right.
+**Aug 2026 — the AI draft.** The first version was written by an AI in a single sitting. It
+loaded, it "worked", and it was wrong in ways that matter: a 60 Hz background thread read
+game objects off the game thread (a data race waiting to happen), weather classification
+read the wrong byte of the weather data, and interior detection demanded a lighting
+template that plenty of interiors don't have. The README at the time boasted about
+"asynchronous thread execution" eliminating stutters. None of that was true.
+
+**Aug 2026 — the human rewrite.** Same idea, rewritten by a person against how the game
+actually behaves: on-demand sampling on the render thread, real WeatherDataFlags bits,
+plain `IsInterior()`, an idiomatic `F4SE_PLUGIN_LOAD` entry point, and dependencies
+vendored so the repo builds out of the box. Then it was tested in-game, and this README was
+rewritten to say only what the code does.
+
+**Now.** The plugin is in the state this README describes: honest, tested, with its
+limitations written down. The export ABI is the standard ENB Helper one (see
+[Credits and lineage](#credits-and-lineage)); everything behind it is this project's own
+code. AI still helps out — it just doesn't write the parts that have to be right.
 
 ## What it exports
 
@@ -148,6 +162,12 @@ were AI-generated. The rewrite, the fixes, and this README are human — and thi
 claims match the code. If you're using AI to write game plugins, take this as the cautionary
 tale: the code will load, and it will still be wrong in the ways a human who knows the
 runtime has to catch.
+
+## Author
+
+Maintained by **lelsliem**. This started as a "can I just get ENB to know what the weather
+is doing" experiment, and turned into a lesson in why AI-generated game plugins need a
+human pass before you trust them in a load order. Issues and pull requests are welcome.
 
 ## License
 
