@@ -98,6 +98,8 @@ static void SnapshotCamera(const RE::PlayerCamera* a_camera, ThreadCachedData& a
 // ENB/ReShade call from.
 void RefreshCachedState() noexcept
 {
+    ++g_callCount;
+
     const auto* sky = RE::Sky::GetSingleton();
     const auto* player = RE::PlayerCharacter::GetSingleton();
     const auto* playerCamera = RE::PlayerCamera::GetSingleton();
@@ -143,6 +145,24 @@ void RefreshCachedState() noexcept
 
     std::unique_lock lock(stateMutex);
     cachedData = fresh;
+
+    // Heartbeat: one INFO line per second while a consumer is calling the
+    // exports. It proves the plugin is actually delivering live data (advancing
+    // time, weather/location IDs, interior flips) instead of just loading.
+    const auto now = std::chrono::steady_clock::now();
+    static auto lastLog = now;
+    if (now - lastLog >= std::chrono::seconds(1)) {
+        lastLog = now;
+        REX::INFO(
+            "heartbeat: calls={} time={:.1f} weather=0x{:08X} class={} loc=0x{:08X} ws=0x{:08X} int={}",
+            g_callCount.load(),
+            cachedData.time,
+            cachedData.currentWeatherID,
+            cachedData.currentWeatherClass,
+            cachedData.locationID,
+            cachedData.worldSpaceID,
+            cachedData.isInterior ? 1 : 0);
+    }
 }
 
 F4SE_PLUGIN_LOAD(const F4SE::LoadInterface* a_f4se)

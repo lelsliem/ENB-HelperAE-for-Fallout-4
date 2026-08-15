@@ -6,6 +6,8 @@ extern std::shared_mutex stateMutex;
 extern ThreadCachedData cachedData;
 extern bool bLoaded;
 
+std::atomic<long> g_callCount{0};
+
 // Every getter refreshes the state on the calling thread first, then reads its
 // field. ENB/ReShade call these from the render thread, so nothing is shared
 // across threads.

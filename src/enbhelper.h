@@ -1,6 +1,7 @@
 #pragma once
 
 #include <shared_mutex>
+#include <atomic>
 #include "RE/Fallout.h"
 
 #ifdef _WIN32
@@ -11,6 +12,10 @@
 
 // True once F4SE_PLUGIN_LOAD has run
 extern bool bLoaded;
+
+// How many times a consumer has called one of the exported getters since load.
+// The heartbeat in RefreshCachedState logs this so the log proves data flows.
+extern std::atomic<long> g_callCount;
 
 // Cached game state, guarded so concurrent getters don't tear reads
 extern std::shared_mutex stateMutex;
