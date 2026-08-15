@@ -49,6 +49,9 @@ struct ENBHelperHealth {
     int32_t is_interior; // 0 or 1
 };
 
+// The exported names/signatures implement the ENB Helper SE ABI (aers, Nexus
+// 23174; Fallout 4 port by doodlum, enb-helper-alt). ENB and ReShade look
+// these up by name, so they must stay stable. Do not rename or reorder.
 extern "C" {
 
 // Basic getters

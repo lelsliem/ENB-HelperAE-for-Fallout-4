@@ -119,6 +119,28 @@ Copy `ENBHelperF4.dll` to your `Data/F4SE/Plugins/` folder. On load it writes a 
   so the repo didn't build out of the box. It does now.
 - Kept the `.def`-based unmangled exports; that part was fine.
 
+## Credits and lineage
+
+The export ABI this plugin implements comes from **ENB Helper SE** by **aers**
+(Nexus 23174) — the plugin ENB itself expects to find. The function names and
+signatures aren't optional: ENB and ReShade look them up by name, so any
+ENB-Helper-compatible plugin has to export exactly these. The Fallout 4 port of
+that API this project started from is **enb-helper-alt** by doodlum
+(https://github.com/doodlum/enb-helper-alt), which covers both Skyrim and
+Fallout 4.
+
+Two things worth being honest about:
+
+- doodlum's repo has no license file, and aers' original is closed-source on
+  Nexus. So the API, and a couple of implementation patterns this project
+  derives from it, carry no explicit upstream permission. If either author
+  objects, the code behind the ABI is a reimplementation and can be reworked —
+  the function names can't change, but the code can.
+- This implementation is a rewrite: on-demand sampling instead of a background
+  thread, corrected classification and interior detection. It shares the
+  public API and the behaviors that API dictates, but it is not a copy of
+  either upstream project.
+
 ## AI and this project
 
 This project is openly AI-assisted. The first draft, the bugs, and the overblown README
