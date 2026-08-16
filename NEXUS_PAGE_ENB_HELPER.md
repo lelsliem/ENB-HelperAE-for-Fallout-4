@@ -23,7 +23,9 @@ The first release of this mod (v1.5.0) was written by an AI in a single sitting.
 
 That release was pulled. This is the corrected rebuild.
 
-## What this version fixes
+## What the corrected rebuild (v1.5.1) fixed
+
+**v1.5.2 adds multiversion coverage** (see [Requirements](#requirements) and the [Changelog](#changelog)) — the bugs fixed in v1.5.1 are:
 
 - **Removed the data-race worker thread.** Getters now sample on demand on the calling thread — which is exactly where ENB and ReShade call from anyway. Nothing is shared across threads, so there is nothing to race.
 - **Fixed weather classification.** It now reads the actual `kPleasant` / `kCloudy` / `kRainy` / `kSnow` bits from the weather record, not the wind-speed byte.
