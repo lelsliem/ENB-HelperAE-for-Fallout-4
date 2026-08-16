@@ -9,12 +9,15 @@ F4SE_PLUGIN_VERSION = []() noexcept {
     v.UsesSigScanning(false);
     v.IsLayoutDependent(true);
     v.HasNoStructUse(false);
-    // Multiversion NG build: one binary for every Next-Gen runtime, resolved
-    // per-version through the Address Library. 1.10.163 (pre-NG) is NOT in
-    // this list — it has a different memory layout and needs its own build.
+    // Multiversion 1.11.x build: one binary for every 1.11.x runtime, resolved
+    // per-version through the Address Library.
+    //
+    // 1.10.980 / 1.10.984 are deliberately EXCLUDED: the Address Library uses
+    // two different ID schemes across the NG era (the 1.10.x DBs predate the
+    // 1.11.x renumbering), and the singleton IDs baked into CommonLibF4 only
+    // exist in one family. Verified on 1.11.221; the 1.10.x runtimes need the
+    // pre-NG build (see the release package).
     v.CompatibleVersions({
-        F4SE::RUNTIME_1_10_980,
-        F4SE::RUNTIME_1_10_984,
         F4SE::RUNTIME_1_11_137,
         F4SE::RUNTIME_1_11_159,
         F4SE::RUNTIME_1_11_169,

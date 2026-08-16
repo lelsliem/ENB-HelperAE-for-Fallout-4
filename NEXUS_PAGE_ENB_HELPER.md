@@ -56,8 +56,10 @@ All getters sample on demand on the render thread. Game addresses come from the 
 
 ## Requirements
 
-- Fallout 4 Next-Gen / AE — any runtime **1.10.980 through 1.11.221** (one DLL covers
-  all of them via the Address Library)
+- Fallout 4 Next-Gen / AE — **1.11.137 through 1.11.221** (this DLL covers all five
+  1.11.x runtimes via the Address Library). **1.10.980 / 1.10.984 need the separate
+  pre-NG DLL** included in the same package — the Address Library uses two different ID
+  schemes across the NG era, so no single binary can cover both families.
 - F4SE matching your runtime
 - Address Library for F4SE Plugins (NG)
 
@@ -79,11 +81,13 @@ Two things worth being honest about:
 
 ## Changelog
 
-**v1.5.2 — multiversion Next-Gen:**
-- One DLL now covers every Next-Gen runtime (1.10.980, 1.10.984, and 1.11.137 through
-  1.11.221) via the Address Library, instead of just 1.11.221.
-- Pre-NG 1.10.163 is not covered by this DLL — it has a different memory layout and
-  needs its own build.
+**v1.5.2 — multiversion 1.11.x (corrected):**
+- One DLL now covers every 1.11.x runtime (1.11.137 through 1.11.221) via the Address
+  Library, instead of just 1.11.221.
+- **1.10.980 / 1.10.984 are not covered by this DLL** — the Address Library uses a
+  different ID scheme for those runtimes, proven by an in-game test on 1.10.984
+  (`Invalid ID: 4798212`). The package ships a second pre-NG DLL for them.
+- Pre-NG 1.10.163 is not covered either — different memory layout, needs its own build.
 
 **v1.5.1 — the corrected rebuild** (the AI-written v1.5.0 was pulled):
 - Removed the 60 Hz worker thread (data race) — getters sample on demand.

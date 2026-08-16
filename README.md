@@ -105,9 +105,10 @@ no hand-rolled `DllMain`.
 ## Building
 
 Requirements: Fallout 4 with F4SE and the Address Library for F4SE Plugins (NG),
-Visual Studio 2022 Build Tools, and xmake 3.0.0+. The built DLL targets every Next-Gen
-runtime (1.10.980 through 1.11.221) via the Address Library; pre-NG 1.10.163 needs its
-own build.
+Visual Studio 2022 Build Tools, and xmake 3.0.0+. The built DLL targets every 1.11.x
+runtime (1.11.137 through 1.11.221) via the Address Library. 1.10.980 / 1.10.984 use a
+different Address Library ID scheme and need the pre-NG build (shipped alongside this
+one in the release package); pre-NG 1.10.163 needs its own build.
 
 ```sh
 xmake f -m releasedbg -y
@@ -131,18 +132,23 @@ Copy `ENBHelperF4.dll` to your `Data/F4SE/Plugins/` folder. On load it writes a 
 
 ## Changelog
 
-### v1.5.2 — multiversion Next-Gen
+### v1.5.2 — multiversion 1.11.x (corrected)
 
-One binary now covers every Next-Gen runtime — 1.10.980, 1.10.984, and 1.11.137
-through 1.11.221 — instead of just 1.11.221. All game access already goes through the
-Address Library, so the only change is that `F4SEPlugin_Version` now declares the full
-NG list instead of `RUNTIME_LATEST`.
+One binary now covers every 1.11.x runtime — 1.11.137, 1.11.159, 1.11.169, 1.11.191,
+1.11.221 — instead of just 1.11.221. All game access already goes through the Address
+Library, so the only change is that `F4SEPlugin_Version` now declares the full 1.11.x
+list instead of `RUNTIME_LATEST`.
 
-- `CompatibleVersions` lists all seven Next-Gen runtimes.
+- **1.10.980 / 1.10.984 are NOT covered by this DLL.** The Address Library uses two
+  different ID schemes across the NG era: the 1.10.x databases predate the 1.11.x
+  renumbering, so the singleton IDs baked into CommonLibF4 (`PlayerCharacter`,
+  `PlayerCamera`) only exist in one family per runtime. This was caught by real testing
+  on 1.10.984 (`Failed to find offset for Address Library ID! Invalid ID: 4798212`).
+  The 1.10.x runtimes need the pre-NG build shipped alongside this one.
 - Pre-NG 1.10.163 is deliberately excluded: it has a different memory layout and needs
   its own build.
 - The layout-dependent caveat still applies — the fields this plugin reads are stable
-  across the NG era, but it has only been in-game tested on 1.11.221 so far.
+  across the 1.11.x era, and this build has been in-game tested on 1.11.221.
 
 ### v1.5.1 — the one where I fixed the AI's bugs
 
