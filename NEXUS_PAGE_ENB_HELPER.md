@@ -2,7 +2,7 @@
 
 ## Short description (for the "Short description" field — ≤ 350 chars)
 
-Tells ENB and ReShade what Fallout 4 is doing: time of day, weather and classification, location, interior/exterior, and camera transforms — read on demand, no config, no background threads. Requires F4SE and Address Library. Originally AI-written and pulled for bugs; this v1.5.1 rebuild is corrected, tested in-game, and fully documented.
+Tells ENB and ReShade what Fallout 4 is doing: time of day, weather and classification, location, interior/exterior, and camera transforms — read on demand, no config, no background threads. Requires F4SE and Address Library. Originally AI-written and pulled for bugs; this v1.5.2 rebuild is corrected, tested in-game, and fully documented.
 
 ---
 
@@ -23,7 +23,7 @@ The first release of this mod (v1.5.0) was written by an AI in a single sitting.
 
 That release was pulled. This is the corrected rebuild.
 
-## What this version (v1.5.1) fixes
+## What this version fixes
 
 - **Removed the data-race worker thread.** Getters now sample on demand on the calling thread — which is exactly where ENB and ReShade call from anyway. Nothing is shared across threads, so there is nothing to race.
 - **Fixed weather classification.** It now reads the actual `kPleasant` / `kCloudy` / `kRainy` / `kSnow` bits from the weather record, not the wind-speed byte.
@@ -43,7 +43,7 @@ That release was pulled. This is the corrected rebuild.
 - `GetIsInterior` — true if the player is inside an interior cell
 - `GetReShadeBridgePointer` — a stable pointer to a small shared struct (time, interior flag, weather FormID) for ReShade shaders
 - `GetHealthStatus` — all of the above in one struct, one call
-- `GetPluginVersion` — 1.51
+- `GetPluginVersion` — 1.52
 
 All getters sample on demand on the render thread. Game addresses come from the **Address Library** via CommonLibF4 — no hard-coded offsets, so a game update doesn't silently break it.
 
@@ -52,12 +52,13 @@ All getters sample on demand on the render thread. Game addresses come from the 
 - It only reads. There's no API for shaders to push values back into the game.
 - The getters must be called from the game/render thread — that's where ENB and ReShade call them from. If something else calls them from a worker thread, you're on your own.
 - ENB's proxy still calls the camera getter with a mismatched prototype, so the camera data may not reach ENB even though the game survives. The export is guarded and safe; making ENB's camera data actually land would require reverse-engineering ENB's expected signature. (This is the one known functional gap — everything else delivers real values, verified.)
-- `GetPluginVersion()` returns a float (1.51). Floats are a silly way to version things, but it's the ABI that's already out there.
+- `GetPluginVersion()` returns a float (1.52). Floats are a silly way to version things, but it's the ABI that's already out there.
 
 ## Requirements
 
-- Fallout 4 Next-Gen / AE (runtime **1.11.221**)
-- F4SE **0.7.8**
+- Fallout 4 Next-Gen / AE — any runtime **1.10.980 through 1.11.221** (one DLL covers
+  all of them via the Address Library)
+- F4SE matching your runtime
 - Address Library for F4SE Plugins (NG)
 
 ## Install
@@ -77,6 +78,12 @@ Two things worth being honest about:
 - **This is a rewrite, not a copy.** On-demand sampling instead of a background thread, corrected classification and interior detection, guarded writes. It shares the public API and the behaviors that API dictates, but the implementation is its own. The lineage is credited here precisely because of that history.
 
 ## Changelog
+
+**v1.5.2 — multiversion Next-Gen:**
+- One DLL now covers every Next-Gen runtime (1.10.980, 1.10.984, and 1.11.137 through
+  1.11.221) via the Address Library, instead of just 1.11.221.
+- Pre-NG 1.10.163 is not covered by this DLL — it has a different memory layout and
+  needs its own build.
 
 **v1.5.1 — the corrected rebuild** (the AI-written v1.5.0 was pulled):
 - Removed the 60 Hz worker thread (data race) — getters sample on demand.

@@ -1,7 +1,8 @@
 -- ENBHelperF4 — xmake build
 --
 -- Requirements:
---   xmake >= 3.0.0, Visual Studio 2022 (v143), Fallout 4 / F4SE runtime 1.11.221
+--   xmake >= 3.0.0, Visual Studio 2022 (v143), Fallout 4 / F4SE (Next-Gen:
+--   1.10.980 through 1.11.221, one multiversion binary via the Address Library)
 --
 -- Build:     xmake f -m releasedbg -y && xmake build
 
@@ -18,7 +19,7 @@ if os.host() == "windows" then
     set_config("plat", "windows")
 end
 
-set_version("1.5.1")
+set_version("1.5.2")
 set_license("GPL-3.0")
 set_languages("c++23")
 set_encodings("utf-8")
@@ -44,7 +45,7 @@ target("ENBHelperF4", function()
         name        = "ENBHelperF4",
         author      = "lelsliem",
         description = "ENBHelperF4 - ReShade/ENB bridge for Fallout 4 AE",
-        version     = "1.5.1",
+        version     = "1.5.2",
     })
 
     add_files("src/**.cpp")

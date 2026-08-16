@@ -69,7 +69,7 @@ doesn't write the parts that have to be right.
 | `GetIsInterior(bool&)` | 1 if the player is inside an interior cell |
 | `GetReShadeBridgePointer()` | Stable pointer to a small shared struct (time, interior flag, weather FormID) for ReShade shaders |
 | `GetHealthStatus(ENBHelperHealth*)` | All of the above in one struct, one call |
-| `GetPluginVersion()` | `1.51` (1.5.1 as a float) |
+| `GetPluginVersion()` | `1.52` (1.5.2 as a float) |
 | `IsLoaded()` | True once the plugin has loaded successfully |
 
 The exports keep their C names via `src/ENBHelperF4.def` so ENB/ReShade can find them by
@@ -99,13 +99,15 @@ no hand-rolled `DllMain`.
 - It only reads. There's no API for shaders to push values back into the game.
 - The getters must be called from the game/render thread. That's where ENB and ReShade call
   them from; if something else calls them from a worker thread, you're on your own.
-- `GetPluginVersion()` returns a float (1.51). Floats are a silly way to version things, but
+- `GetPluginVersion()` returns a float (1.52). Floats are a silly way to version things, but
   it's the ABI that's already out there.
 
 ## Building
 
-Requirements: Fallout 4 with F4SE (Next-Gen 1.11.221) and the Address Library for F4SE
-Plugins, Visual Studio 2022 Build Tools, and xmake 3.0.0+.
+Requirements: Fallout 4 with F4SE and the Address Library for F4SE Plugins (NG),
+Visual Studio 2022 Build Tools, and xmake 3.0.0+. The built DLL targets every Next-Gen
+runtime (1.10.980 through 1.11.221) via the Address Library; pre-NG 1.10.163 needs its
+own build.
 
 ```sh
 xmake f -m releasedbg -y
@@ -128,6 +130,19 @@ Copy `ENBHelperF4.dll` to your `Data/F4SE/Plugins/` folder. On load it writes a 
 `My Games/Fallout4/F4SE/ENBHelperF4.log`.
 
 ## Changelog
+
+### v1.5.2 — multiversion Next-Gen
+
+One binary now covers every Next-Gen runtime — 1.10.980, 1.10.984, and 1.11.137
+through 1.11.221 — instead of just 1.11.221. All game access already goes through the
+Address Library, so the only change is that `F4SEPlugin_Version` now declares the full
+NG list instead of `RUNTIME_LATEST`.
+
+- `CompatibleVersions` lists all seven Next-Gen runtimes.
+- Pre-NG 1.10.163 is deliberately excluded: it has a different memory layout and needs
+  its own build.
+- The layout-dependent caveat still applies — the fields this plugin reads are stable
+  across the NG era, but it has only been in-game tested on 1.11.221 so far.
 
 ### v1.5.1 — the one where I fixed the AI's bugs
 
